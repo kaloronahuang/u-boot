@@ -36,16 +36,17 @@ unsigned long load_elf64_image_phdr(unsigned long addr)
 	for (i = 0; i < ehdr->e_phnum; ++i) {
 		void *dst = (void *)(ulong)phdr->p_paddr;
 		void *src = (void *)addr + phdr->p_offset;
-
-		debug("Loading phdr %i to 0x%p (%lu bytes)\n",
-		      i, dst, (ulong)phdr->p_filesz);
-		if (phdr->p_filesz)
-			memcpy(dst, src, phdr->p_filesz);
-		if (phdr->p_filesz != phdr->p_memsz)
-			memset(dst + phdr->p_filesz, 0x00,
-			       phdr->p_memsz - phdr->p_filesz);
-		flush_cache(rounddown((unsigned long)dst, ARCH_DMA_MINALIGN),
-			    roundup(phdr->p_memsz, ARCH_DMA_MINALIGN));
+		if (phdr->p_type == 0x1) {
+			debug("Loading phdr %i to 0x%p (%lu bytes)\n",
+				i, dst, (ulong)phdr->p_filesz);
+			if (phdr->p_filesz)
+				memcpy(dst, src, phdr->p_filesz);
+			if (phdr->p_filesz != phdr->p_memsz)
+				memset(dst + phdr->p_filesz, 0x00,
+					phdr->p_memsz - phdr->p_filesz);
+			flush_cache(rounddown((unsigned long)dst, ARCH_DMA_MINALIGN),
+					roundup(phdr->p_memsz, ARCH_DMA_MINALIGN));
+		}
 		++phdr;
 	}
 
@@ -151,16 +152,17 @@ unsigned long load_elf_image_phdr(unsigned long addr)
 	for (i = 0; i < ehdr->e_phnum; ++i) {
 		void *dst = (void *)(uintptr_t)phdr->p_paddr;
 		void *src = (void *)addr + phdr->p_offset;
-
-		debug("Loading phdr %i to 0x%p (%i bytes)\n",
-		      i, dst, phdr->p_filesz);
-		if (phdr->p_filesz)
-			memcpy(dst, src, phdr->p_filesz);
-		if (phdr->p_filesz != phdr->p_memsz)
-			memset(dst + phdr->p_filesz, 0x00,
-			       phdr->p_memsz - phdr->p_filesz);
-		flush_cache(rounddown((unsigned long)dst, ARCH_DMA_MINALIGN),
-			    roundup(phdr->p_memsz, ARCH_DMA_MINALIGN));
+		if (phdr->p_type == 0x1) {
+			debug("Loading phdr %i to 0x%p (%i bytes)\n",
+				i, dst, phdr->p_filesz);
+			if (phdr->p_filesz)
+				memcpy(dst, src, phdr->p_filesz);
+			if (phdr->p_filesz != phdr->p_memsz)
+				memset(dst + phdr->p_filesz, 0x00,
+					phdr->p_memsz - phdr->p_filesz);
+			flush_cache(rounddown((unsigned long)dst, ARCH_DMA_MINALIGN),
+					roundup(phdr->p_memsz, ARCH_DMA_MINALIGN));
+		}
 		++phdr;
 	}
 
